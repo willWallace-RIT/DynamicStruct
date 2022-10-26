@@ -1,5 +1,5 @@
 CXX = g++
-CFLAGS = -g -std=c++17 -O2
+CFLAGS = -g -std=c++20
 
 SRCS=main.cpp
 OBJS=$(subst .cpp,.o,$(SRCS))
