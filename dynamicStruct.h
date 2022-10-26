@@ -11,10 +11,9 @@ struct DynoStructVariable{
 template<typename T>
 class DynamicStruct{
   public:
-    DynamicStruct(std::shared_ptr<char> data,size_t size){
+    DynamicStruct(std::shared_ptr<char>& data,size_t size){
       this->data = data;
       this->size = size;
-      std::cout<<"struct size:"<<size<<std::endl;
       currentOffset = 0;
     }
 
@@ -25,7 +24,6 @@ class DynamicStruct{
           variableSet.insert(std::pair<T,DynoStructVariable>(identifier,{static_cast<unsigned int>(size),currentOffset}));
           memcpy(this->data.get()+currentOffset,data,size);
           currentOffset+=size;
-          std::cout <<"byteoffset" <<variableSet[identifier].byteoffset<<std::endl;
           return true;
         }
       }
@@ -34,7 +32,6 @@ class DynamicStruct{
     template<typename R>
       void copyCmd(const void* data, size_t size){
         memcpy(this->data.get()+currentOffset,data,size);
-        std::cout<<"current offset:"<<currentOffset<<std::endl;
         currentOffset+=size;
       }
     template<typename R>
@@ -48,9 +45,7 @@ class DynamicStruct{
           if(result == variableSet.end()){
             variableSet.insert(std::pair<T,DynoStructVariable>(identifier,{static_cast<unsigned int>(size),currentOffset}));
             size_t elemCount = ((size_t)(size/sizeof(R)));
-            std::cout<<"elemCount:"<<elemCount<<std::endl;
             if(std::is_same<R,char>::value){
-              std::cout<<"same"<<std::endl;
               if(*((char*)(data+elemCount-1))=='\0'){
                 elemCount--;
                 variableSet[identifier] = {variableSet[identifier].size-1,variableSet[identifier].byteoffset};
@@ -58,12 +53,9 @@ class DynamicStruct{
             }
             R val;
             for(size_t i = 0;i<elemCount;i++){
-              std::cout<<sizeof(R)<<std::endl;
               val = (*(data+i));
-              std::cout<<val<<std::endl;
               copyCmd<R>(&val,sizeof(R));
             }
-            std::cout << currentOffset << std::endl;
             return true;
           }
         }
@@ -93,14 +85,14 @@ class DynamicStruct{
         return *ptr;
       }
     template<typename R>
-      void getValuePtr(std::shared_ptr<R> xc,T identifier){
-        xc = std::make_shared<R>((size_t)(getVariableInfo(identifier).size/sizeof(R)));
-        size_t elemCount = ((size_t)(size/sizeof(R)));
+      void getValuePtr(std::shared_ptr<R>& xc,T identifier){
+        //xc = std::make_shared<R>((size_t)(getVariableInfo(identifier).size));
+        size_t elemCount = ((size_t)(getVariableInfo(identifier).size/sizeof(R)));
         //R* ptr = (R*)(data.get()+getVariableInfo(identifier).byteoffset)
         //
         //std::shared_ptr<char> xc = std::make_shared<char>(;
         for(int i = 0;i<elemCount;i++){
-          copyCmd(xc,data.get()+getVariableInfo(identifier).byteoffset+(i*sizeof(R)),i,sizeof(R));
+          copyCmd(xc,data.get()+(getVariableInfo(identifier).byteoffset+(i*sizeof(R))),i,sizeof(R));
         }
         //T* val = (T*)xc.get();
       }
