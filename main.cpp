@@ -45,6 +45,17 @@ int main(){
   std::cout<<&xc2<<std::endl;
    
   std::cout<<(xc2.get())<<std::endl;
+  int change = 5;
+  dS.set("x",&change,sizeof(int));
+  
+  std::cout<<dS.getValue<int>("x")<<std::endl;
+  char charchange = 'b';
+  dS.setArrayElem<char>("bleh",&charchange,0);
+  charchange = 'd';
+  
+  dS.setArrayElem<char>("bleh",&charchange,6);
+  dS.getValuePtr<char>(xc2,"bleh");
+  std::cout<<xc2.get()<<std::endl;
   std::cout << std::endl;
   return 0;
 }

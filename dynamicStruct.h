@@ -64,11 +64,27 @@ class DynamicStruct{
     bool set(T identifier,const void* data, size_t size){ 
       auto result = variableSet.find(identifier);
       if(result != variableSet.end()){
-        memcpy(this->data.get()+result.second().byteoffset,data,size);
-        return true;
+        if(size+result->second.byteoffset < this->size){
+          memcpy(this->data.get()+result->second.byteoffset,data,size);
+          return true;
+
+        }
       }
       return false;
     }
+
+    template<typename R> 
+      bool setArrayElem(T identifier,const void* data,unsigned int index){ 
+        auto result = variableSet.find(identifier); 
+        if(result != variableSet.end()){
+          if(index<((result->second.size/sizeof(R)))){ 
+            memcpy(this->data.get()+(result->second.byteoffset+(index*sizeof(R))),data,sizeof(R));
+            return true;
+          }
+        }
+        return false;
+      }
+
     DynoStructVariable getVariableInfo(T identifier){
       auto result = variableSet.find(identifier);
       if(result != variableSet.end()){
